@@ -26,6 +26,7 @@ namespace UpdateRagedIPs
                 {
                     var ip = driver.FindElement(By.XPath($"/html/body/div[1]/div[3]/main/div[3]/table/tbody/tr[{x}]/td[2]/strong")).Text;
                     Console.WriteLine(ip);
+                 
 
                 }
                 catch(Exception ex) { }
