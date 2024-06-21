@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Threading;
 
 namespace UpdateRagedIPs
 {
@@ -129,21 +130,30 @@ namespace UpdateRagedIPs
                     linesCounter++;
 
                     driver.Navigate().GoToUrl($"https://www.nslookup.io/domains/{line}/webservers/");
+                    Thread.Sleep(3000);
 
+                    try
+                    {
 
-                    
-                        using (StreamWriter writer = new StreamWriter("Ips.txt"))
+                        for (int x = 0; x < 1000; x++)
                         {
-                            for (int x = 0; x < 1000; x++)
+                            //var ip = driver.FindElement(By.XPath($"/html/body/div[1]/div[3]/main/div[3]/table/tbody/tr[{x}]/td[2]/strong")).Text;
+                            var ip = driver.FindElement(By.CssSelector($"#app > div.flex-grow.bg-neutral-100 > main > div.bg-white.shadow.p-6.pb-10.rounded-t > table > tbody > tr:nth-child({x}) > td.py-1 > strong")).Text;
+                            //#app > div.flex-grow.bg-neutral-100 > main > div.bg-white.shadow.p-6.pb-10.rounded-t > table > tbody > tr:nth-child(1) > td.py-1 > strong
+                            Console.WriteLine(ip);
+                            using (StreamWriter writer = new StreamWriter("Ips.txt", true))
                             {
-                                var ip = driver.FindElement(By.XPath($"/html/body/div[1]/div[3]/main/div[3]/table/tbody/tr[{x}]/td[2]/strong")).Text;
                                 writer.WriteLine(ip);
-                                Console.WriteLine(ip);
                             }
                         }
-                        driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(2);
 
-                    
+
+                    }
+                    catch (Exception) { }
+
+
+
+
                 }
 
                 Console.WriteLine(linesCounter);
