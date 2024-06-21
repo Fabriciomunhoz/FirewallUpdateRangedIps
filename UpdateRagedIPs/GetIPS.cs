@@ -31,9 +31,10 @@ namespace UpdateRagedIPs
                     {
                         try
                         {
-                        File.Copy("dados.txt", "dados_backup.txt", true);
+                            File.Copy("dados.txt", "dados_backup.txt", true);
 
-                        }catch(Exception e) { Console.WriteLine("Erro ao tentar fazer Backup"); }
+                        }
+                        catch (Exception e) { Console.WriteLine("Erro ao tentar fazer Backup"); }
                         try
                         {
                             File.WriteAllText("dados.txt", "");
@@ -64,5 +65,90 @@ namespace UpdateRagedIPs
         }
 
 
+
+        public void ReadAllDomains()
+        {
+            string rootFolder = @"C:\Users\jmed\Documents\Projetos\UpdateRagedIPs\UpdateRagedIPs\BL";
+
+
+            ProcessDirectory(rootFolder);
+
+            Console.WriteLine("Ok");
+
+            Console.ReadKey();
+
+        }
+
+
+        static void ProcessDirectory(string currentFolder)
+        {
+            try
+            {
+
+
+                string[] files = Directory.GetFiles(currentFolder);
+                foreach (string file in files)
+                {
+                    ProcessFiles(file);
+
+                }
+
+
+                string[] subFolders = Directory.GetDirectories(currentFolder);
+                foreach (string subFolder in subFolders)
+                {
+                    ProcessDirectory(subFolder);
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Console.WriteLine($"Not permission for access: {currentFolder}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error for access: {currentFolder}. Error: {ex.Message}");
+            }
+        }
+
+        static void ProcessFiles(string pathFile)
+        {
+
+            var driver = new ChromeDriver();
+
+
+            try
+            {
+                Console.WriteLine($"Read file: {pathFile}");
+
+                string[] lines = File.ReadAllLines(pathFile);
+                int linesCounter = 0;
+
+                foreach (string line in lines)
+                {
+                    Console.WriteLine("Site: " + line);
+                    linesCounter++;
+
+                    driver.Navigate().GoToUrl($"https://www.nslookup.io/domains/{line}/webservers/");
+
+
+                    
+                        using (StreamWriter writer = new StreamWriter("Ips.txt"))
+                        {
+                            for (int x = 0; x < 1000; x++)
+                            {
+                                var ip = driver.FindElement(By.XPath($"/html/body/div[1]/div[3]/main/div[3]/table/tbody/tr[{x}]/td[2]/strong")).Text;
+                                writer.WriteLine(ip);
+                                Console.WriteLine(ip);
+                            }
+                        }
+                        driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(2);
+
+                    
+                }
+
+                Console.WriteLine(linesCounter);
+            }
+            catch (Exception ex) { }
+        }
     }
 }
